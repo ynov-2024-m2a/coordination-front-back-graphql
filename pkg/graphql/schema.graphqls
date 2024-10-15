@@ -21,22 +21,18 @@ type Root {
 
 type Query {
     root: Root
-    folder(id: ID!): Folder
-    file(id: ID!): File
 }
 
 type Subscription {
     root: Root
-    folder(id: ID!): Folder
     file(id: ID!): File
 }
 
 type Mutation {
     createFile(name: String!, content: String!): File
-    updateFile(id: ID!, content: String!): File
+    updateFileContent(id: ID!, content: String!): File
     deleteFile(id: ID!): Boolean
 
     createFolder(name: String!): Folder
     deleteFolder(id: ID!): Boolean
-    updateFolder(id: ID!, name: String!): Folder
 }

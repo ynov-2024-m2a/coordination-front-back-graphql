@@ -6,7 +6,7 @@ package graphql
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"github.com/drive/pkg/drive"
 	"github.com/drive/pkg/models"
@@ -14,32 +14,28 @@ import (
 
 // CreateFile is the resolver for the createFile field.
 func (r *mutationResolver) CreateFile(ctx context.Context, name string, content string) (*models.File, error) {
-	return drive.NewFile(name, content), nil
+	slog.Info("Creating file", "name", name, "content", content)
+	return drive.NewFile(name, content)
 }
 
-// UpdateFile is the resolver for the updateFile field.
-func (r *mutationResolver) UpdateFile(ctx context.Context, id string, content string) (*models.File, error) {
-	panic(fmt.Errorf("not implemented: UpdateFile - updateFile"))
+// UpdateFileContent is the resolver for the updateFileContent field.
+func (r *mutationResolver) UpdateFileContent(ctx context.Context, id string, content string) (*models.File, error) {
+	return drive.UpdateFileContent(id, content)
 }
 
 // DeleteFile is the resolver for the deleteFile field.
 func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (*bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteFile - deleteFile"))
+	return drive.DeleteFile(id)
 }
 
 // CreateFolder is the resolver for the createFolder field.
 func (r *mutationResolver) CreateFolder(ctx context.Context, name string) (*models.Folder, error) {
-	panic(fmt.Errorf("not implemented: CreateFolder - createFolder"))
+	return drive.NewFolder(name)
 }
 
 // DeleteFolder is the resolver for the deleteFolder field.
 func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (*bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteFolder - deleteFolder"))
-}
-
-// UpdateFolder is the resolver for the updateFolder field.
-func (r *mutationResolver) UpdateFolder(ctx context.Context, id string, name string) (*models.Folder, error) {
-	panic(fmt.Errorf("not implemented: UpdateFolder - updateFolder"))
+	return drive.DeleteFolder(id)
 }
 
 // Root is the resolver for the root field.
@@ -47,29 +43,14 @@ func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
 	return drive.GetRoot(), nil
 }
 
-// Folder is the resolver for the folder field.
-func (r *queryResolver) Folder(ctx context.Context, id string) (*models.Folder, error) {
-	panic(fmt.Errorf("not implemented: Folder - folder"))
-}
-
-// File is the resolver for the file field.
-func (r *queryResolver) File(ctx context.Context, id string) (*models.File, error) {
-	panic(fmt.Errorf("not implemented: File - file"))
-}
-
 // Root is the resolver for the root field.
 func (r *subscriptionResolver) Root(ctx context.Context) (<-chan *models.Root, error) {
-	panic(fmt.Errorf("not implemented: Root - root"))
-}
-
-// Folder is the resolver for the folder field.
-func (r *subscriptionResolver) Folder(ctx context.Context, id string) (<-chan *models.Folder, error) {
-	panic(fmt.Errorf("not implemented: Folder - folder"))
+	return drive.SubscribeRoot(), nil
 }
 
 // File is the resolver for the file field.
 func (r *subscriptionResolver) File(ctx context.Context, id string) (<-chan *models.File, error) {
-	panic(fmt.Errorf("not implemented: File - file"))
+	return drive.SubscribeFile(id)
 }
 
 // Mutation returns MutationResolver implementation.
