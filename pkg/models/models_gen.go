@@ -14,6 +14,9 @@ type Folder struct {
 	Files []*File `json:"files"`
 }
 
+type Mutation struct {
+}
+
 type Query struct {
 }
 

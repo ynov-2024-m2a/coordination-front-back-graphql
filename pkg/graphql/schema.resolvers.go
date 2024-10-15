@@ -1,4 +1,4 @@
-package graph
+package graphql
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -8,12 +8,43 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/drive/pkg/drive"
 	"github.com/drive/pkg/models"
 )
 
+// CreateFile is the resolver for the createFile field.
+func (r *mutationResolver) CreateFile(ctx context.Context, name string, content string) (*models.File, error) {
+	return drive.NewFile(name, content), nil
+}
+
+// UpdateFile is the resolver for the updateFile field.
+func (r *mutationResolver) UpdateFile(ctx context.Context, id string, content string) (*models.File, error) {
+	panic(fmt.Errorf("not implemented: UpdateFile - updateFile"))
+}
+
+// DeleteFile is the resolver for the deleteFile field.
+func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (*bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteFile - deleteFile"))
+}
+
+// CreateFolder is the resolver for the createFolder field.
+func (r *mutationResolver) CreateFolder(ctx context.Context, name string) (*models.Folder, error) {
+	panic(fmt.Errorf("not implemented: CreateFolder - createFolder"))
+}
+
+// DeleteFolder is the resolver for the deleteFolder field.
+func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (*bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteFolder - deleteFolder"))
+}
+
+// UpdateFolder is the resolver for the updateFolder field.
+func (r *mutationResolver) UpdateFolder(ctx context.Context, id string, name string) (*models.Folder, error) {
+	panic(fmt.Errorf("not implemented: UpdateFolder - updateFolder"))
+}
+
 // Root is the resolver for the root field.
 func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
-	panic(fmt.Errorf("not implemented: Root - root"))
+	return drive.GetRoot(), nil
 }
 
 // Folder is the resolver for the folder field.
@@ -41,11 +72,15 @@ func (r *subscriptionResolver) File(ctx context.Context, id string) (<-chan *mod
 	panic(fmt.Errorf("not implemented: File - file"))
 }
 
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 // Subscription returns SubscriptionResolver implementation.
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }

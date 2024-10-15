@@ -5,7 +5,7 @@ schema:
 # Where should the generated server code go?
 exec:
   filename: pkg/graphql/generated.go
-  package: graph
+  package: graphql
 
 # Uncomment to enable federation
 # federation:
@@ -24,7 +24,7 @@ model:
 resolver:
   layout: follow-schema
   dir: pkg/graphql
-  package: graph
+  package: graphql
   filename_template: "{name}.resolvers.go"
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
