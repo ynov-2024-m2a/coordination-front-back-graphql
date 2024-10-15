@@ -1,0 +1,32 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type File {
+    id: ID!
+    name: String!
+    content: String!
+}
+
+type Folder {
+    id: ID!
+    name: String!
+    files: [File!]! 
+}
+
+type Root {
+    folders: [Folder!]!
+    files: [File!]!
+}
+
+type Query {
+    root: Root
+    folder(id: ID!): Folder
+    file(id: ID!): File
+}
+
+type Subscription {
+    root: Root
+    folder(id: ID!): Folder
+    file(id: ID!): File
+}
