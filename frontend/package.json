@@ -1,0 +1,26 @@
+{
+  "name": "drive-front",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "../../Drive-front/node_modules/.bin/next dev",
+    "build": "../../Drive-front/node_modules/.bin/next build",
+    "start": "../../Drive-front/node_modules/.bin/next start",
+    "lint": "../../Drive-front/node_modules/.bin/next lint"
+  },
+  "dependencies": {
+    "antd": "^5.21.4",
+    "next": "14.2.15",
+    "react": "^18",
+    "react-dom": "^18",
+    "sass": "^1.80.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.15",
+    "typescript": "^5"
+  }
+}
