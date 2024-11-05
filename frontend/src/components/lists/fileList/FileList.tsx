@@ -9,7 +9,6 @@ const GET_FILES = gql`
     query {
       root {
         files {
-          id
           name
         }
       }
@@ -18,7 +17,9 @@ const GET_FILES = gql`
 const { Dragger } = Upload;
 
 const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (file: string) => void }) => {
-    const { loading, error, data } = useQuery(GET_FILES);
+    const { loading, error, data } = useQuery(GET_FILES, {
+        variables: { folder },
+    });
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
