@@ -6,7 +6,7 @@ import MainContent from "@/components/mainContent/MainContent";
 import styles from "./page.module.scss";
 
 const client = new ApolloClient({
-    uri: 'http://localhost:8080/graphql/query',
+    uri: 'http://localhost:8080/query',
     cache: new InMemoryCache()
 });
 
