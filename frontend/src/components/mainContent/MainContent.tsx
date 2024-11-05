@@ -37,6 +37,29 @@ const MainContent = () => {
     const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
+    const handleBreadcrumbClick = (item: string) => {
+        if (item === 'Accueil') {
+            setSelectedFolder(null);
+            setSelectedFile(null);
+        } else if (item === selectedFolder) {
+            setSelectedFile(null);
+        }
+    };
+
+    const generateBreadcrumbItems = () => {
+        const items = [{ title: 'Accueil', onClick: () => handleBreadcrumbClick('Accueil') }];
+        if (selectedFolder) {
+            items.push({ title: selectedFolder, onClick: () => handleBreadcrumbClick(selectedFolder) });
+        }
+        if (selectedFile) {
+            items.push({
+                onClick(): void {
+                }, title: selectedFile });
+        }
+        return items;
+    };
+
+
     return (
         <Layout style={{ height: '100vh' }}
         >
@@ -52,8 +75,8 @@ const MainContent = () => {
                 </Sider>
                 <Layout style={{ padding: '0 24px 24px' }}>
                     <Breadcrumb
-                        items={[{ title: 'Home' }, { title: 'List' }, { title: 'App' }]}
-                        style={{ margin: '16px 0' }}
+                        items={generateBreadcrumbItems()}
+                        style={{ margin: '16px 0', cursor: 'pointer' }}
                     />
                     <Content
                         style={{
