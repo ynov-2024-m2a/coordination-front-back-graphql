@@ -10,9 +10,37 @@ import (
 var root = models.Root{
 	Folders: []*models.Folder{
 		{
-			ID:    uuid.New().String(),
-			Name:  "Folder #1",
-			Files: []*models.File{},
+			ID:   uuid.New().String(),
+			Name: "Folder #1",
+			Files: []*models.File{
+				{
+					ID:      uuid.New().String(),
+					Name:    "File #1",
+					Content: "Test File 1",
+				},
+			},
+		},
+		{
+			ID:   uuid.New().String(),
+			Name: "Folder #2",
+			Files: []*models.File{
+				{
+					ID:      uuid.New().String(),
+					Name:    "File #2",
+					Content: "Test FIle 2",
+				},
+			},
+		},
+		{
+			ID:   uuid.New().String(),
+			Name: "Folder #3",
+			Files: []*models.File{
+				{
+					ID:      uuid.New().String(),
+					Name:    "File #3",
+					Content: "Test File 3",
+				},
+			},
 		},
 	},
 	Files: []*models.File{},
