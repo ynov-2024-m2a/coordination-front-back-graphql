@@ -1,16 +1,30 @@
 import React from 'react';
 import styles from '@/components/lists/folderList/folderList.module.scss';
+import { useQuery, gql } from '@apollo/client';
 
-const folders = ['Folder1', 'Folder2', 'Folder3'];
+const GET_FOLDERS = gql`
+    query {
+      root {
+        folders {
+            name
+        }
+      }
+    }
+`;
 
 const FolderList = ({ onSelectFolder }: { onSelectFolder: (folder: string) => void }) => {
+    const { loading, error, data } = useQuery(GET_FOLDERS);
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error.message}</p>;
+
     return (
         <div>
-            <p className={styles.title}>Folders</p>
+            <p className={styles.title}>Dossiers</p>
             <div className={styles.folders_list}>
-                {folders.map(folder => (
-                    <div className={styles.folders} key={folder} onClick={() => onSelectFolder(folder)}>
-                        {folder}
+                {data.root.folders.map((folder: {name: string}) => (
+                    <div className={styles.folders} key={folder.name} onClick={() => onSelectFolder(folder.name)}>
+                        {folder.name}
                     </div>
                 ))}
             </div>
