@@ -123,7 +123,59 @@ func DeleteFile(id string) (*bool, error) {
 			return new(bool), nil
 		}
 	}
+	for _, folder := range root.Folders {
+		for i, f := range folder.Files {
+			if f.ID == id {
+				folder.Files = append(folder.Files[:i], folder.Files[i+1:]...)
+
+				select {
+				case rootChan <- &root:
+				default:
+				}
+				delete(fileChannels, id)
+				return new(bool), nil
+			}
+		}
+	}
 	return nil, fmt.Errorf("file with id " + id + " not found")
+}
+
+// func for moving file to folder
+func MoveFile(id, folderID string) (bool, error) {
+	for i, f := range root.Files {
+		if f.ID == id {
+			for _, folder := range root.Folders {
+				if folder.ID == folderID {
+					folder.Files = append(folder.Files, f)
+					root.Files = append(root.Files[:i], root.Files[i+1:]...)
+					select {
+					case rootChan <- &root:
+					default:
+					}
+					return true, nil
+				}
+			}
+			return false, fmt.Errorf("folder with id " + folderID + " not found")
+		}
+	}
+	return false, fmt.Errorf("file with id " + id + " not found")
+}
+
+func MoveFileToRoot(id string) (bool, error) {
+	for _, folder := range root.Folders {
+		for i, f := range folder.Files {
+			if f.ID == id {
+				root.Files = append(root.Files, f)
+				folder.Files = append(folder.Files[:i], folder.Files[i+1:]...)
+				select {
+				case rootChan <- &root:
+				default:
+				}
+				return true, nil
+			}
+		}
+	}
+	return false, fmt.Errorf("file with id " + id + " not found")
 }
 
 func GetRoot() *models.Root {

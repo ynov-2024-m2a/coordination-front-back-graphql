@@ -35,4 +35,8 @@ type Mutation {
 
     createFolder(name: String!): Folder
     deleteFolder(id: ID!): Boolean
+
+    MoveFileToRoot(id: ID!): Boolean
+    MoveFile(id: ID!, folderId: ID!): Boolean
+
 }

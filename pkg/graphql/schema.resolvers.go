@@ -38,6 +38,18 @@ func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (*bool, 
 	return drive.DeleteFolder(id)
 }
 
+// MoveFileToRoot is the resolver for the MoveFileToRoot field.
+func (r *mutationResolver) MoveFileToRoot(ctx context.Context, id string) (*bool, error) {
+	res, err := drive.MoveFileToRoot(id)
+	return &res, err
+}
+
+// MoveFile is the resolver for the MoveFile field.
+func (r *mutationResolver) MoveFile(ctx context.Context, id string, folderID string) (*bool, error) {
+	res, err := drive.MoveFile(id, folderID)
+	return &res, err
+}
+
 // Root is the resolver for the root field.
 func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
 	return drive.GetRoot(), nil
