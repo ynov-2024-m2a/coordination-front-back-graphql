@@ -41,7 +41,9 @@ func main() {
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 	})
 
-	http.Handle("/", c.Handler(playground.Handler("GraphQL playground", "/query")))
+	// Utiliser le middleware CORS pour toutes les routes
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", c.Handler(srv))
 
 	slog.Info("GraphQL server started", "playground", "http://localhost:"+port)
 
