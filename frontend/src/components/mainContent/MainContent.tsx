@@ -56,6 +56,19 @@ const MainContent = () => {
       };
     }
   );
+
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    const keys = e.key.split('-');
+    const folderIndex = parseInt(keys[0], 10) - 1;
+    const fileIndex = parseInt(keys[1], 10) - 1;
+
+    const selectedFolder = data.root.folders[folderIndex];
+    const selectedFile = selectedFolder.files[fileIndex];
+
+    setSelectedFolder(selectedFolder.name);
+    setSelectedFile(selectedFile.name);
+};
+
   const handleBreadcrumbClick = (item: string) => {
     if (item === "Accueil") {
       setSelectedFolder(null);
@@ -94,6 +107,7 @@ const MainContent = () => {
             defaultOpenKeys={["sub1"]}
             style={{ height: "100%", borderRight: 0 }}
             items={siderItems}
+            onClick={handleMenuClick}
           />
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
@@ -110,7 +124,7 @@ const MainContent = () => {
               borderRadius: borderRadiusLG,
             }}>
             {!selectedFolder && (
-              <FolderList onSelectFolder={setSelectedFolder} />
+              <FolderList onSelectFolder={setSelectedFolder} onSelectFile={setSelectedFile} />
             )}
             {selectedFolder && !selectedFile && (
               <FileList
