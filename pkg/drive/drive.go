@@ -10,9 +10,37 @@ import (
 var root = models.Root{
 	Folders: []*models.Folder{
 		{
-			ID:    uuid.New().String(),
-			Name:  "Folder #1",
-			Files: []*models.File{},
+			ID:   uuid.New().String(),
+			Name: "Folder #1",
+			Files: []*models.File{
+				{
+					ID:      uuid.New().String(),
+					Name:    "File #1",
+					Content: "Test File 1",
+				},
+			},
+		},
+		{
+			ID:   uuid.New().String(),
+			Name: "Folder #2",
+			Files: []*models.File{
+				{
+					ID:      uuid.New().String(),
+					Name:    "File #2",
+					Content: "Test FIle 2",
+				},
+			},
+		},
+		{
+			ID:   uuid.New().String(),
+			Name: "Folder #3",
+			Files: []*models.File{
+				{
+					ID:      uuid.New().String(),
+					Name:    "File #3",
+					Content: "Test File 3",
+				},
+			},
 		},
 	},
 	Files: []*models.File{},
@@ -123,7 +151,59 @@ func DeleteFile(id string) (*bool, error) {
 			return new(bool), nil
 		}
 	}
+	for _, folder := range root.Folders {
+		for i, f := range folder.Files {
+			if f.ID == id {
+				folder.Files = append(folder.Files[:i], folder.Files[i+1:]...)
+
+				select {
+				case rootChan <- &root:
+				default:
+				}
+				delete(fileChannels, id)
+				return new(bool), nil
+			}
+		}
+	}
 	return nil, fmt.Errorf("file with id " + id + " not found")
+}
+
+// func for moving file to folder
+func MoveFile(id, folderID string) (bool, error) {
+	for i, f := range root.Files {
+		if f.ID == id {
+			for _, folder := range root.Folders {
+				if folder.ID == folderID {
+					folder.Files = append(folder.Files, f)
+					root.Files = append(root.Files[:i], root.Files[i+1:]...)
+					select {
+					case rootChan <- &root:
+					default:
+					}
+					return true, nil
+				}
+			}
+			return false, fmt.Errorf("folder with id " + folderID + " not found")
+		}
+	}
+	return false, fmt.Errorf("file with id " + id + " not found")
+}
+
+func MoveFileToRoot(id string) (bool, error) {
+	for _, folder := range root.Folders {
+		for i, f := range folder.Files {
+			if f.ID == id {
+				root.Files = append(root.Files, f)
+				folder.Files = append(folder.Files[:i], folder.Files[i+1:]...)
+				select {
+				case rootChan <- &root:
+				default:
+				}
+				return true, nil
+			}
+		}
+	}
+	return false, fmt.Errorf("file with id " + id + " not found")
 }
 
 func GetRoot() *models.Root {

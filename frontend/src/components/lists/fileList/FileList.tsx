@@ -9,7 +9,7 @@ const GET_FILES = gql`
     query {
       root {
         files {
-          name
+          name      
         }
       }
     }
