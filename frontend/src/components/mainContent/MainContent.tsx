@@ -1,5 +1,5 @@
 import React from "react";
-import {useState} from "react";
+import { useState } from "react";
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps, } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
@@ -60,7 +60,6 @@ const MainContent = () => {
         return items;
     };
 
-
     return (
         <Layout style={{ height: '100vh' }}
         >
@@ -88,7 +87,7 @@ const MainContent = () => {
                             borderRadius: borderRadiusLG,
                         }}
                     >
-                        {!selectedFolder && <FolderList onSelectFolder={setSelectedFolder} />}
+                        {!selectedFolder && !selectedFile && <FolderList onSelectFolder={setSelectedFolder} onSelectFile={setSelectedFile} />}
                         {selectedFolder && !selectedFile && <FileList folder={selectedFolder} onSelectFile={setSelectedFile} />}
                         {selectedFile && <FileEditor file={selectedFile} />}
                     </Content>

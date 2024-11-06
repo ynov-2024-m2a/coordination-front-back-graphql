@@ -6,20 +6,21 @@ import type {  UploadProps  } from 'antd';
 import { message, Upload } from 'antd';
 
 const GET_FILES = gql`
-    query {
-      root {
+  query {
+    root {
+      folders {
+        name
         files {
-          name      
+          name
         }
       }
     }
+  }
 `;
 const { Dragger } = Upload;
 
 const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (file: string) => void }) => {
-    const { loading, error, data } = useQuery(GET_FILES, {
-        variables: { folder },
-    });
+    const { loading, error, data } = useQuery(GET_FILES);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
@@ -65,6 +66,8 @@ const props: UploadProps = {
     },
   };
 
+    const selectedFolder = data.root.folders.find((f: { name: string }) => f.name === folder);
+
     return (
         <div>
             <p className={styles.title}>{folder}</p>
@@ -79,6 +82,11 @@ const props: UploadProps = {
                         banned files.
                     </p>
                 </Dragger>
+                {selectedFolder.files.map((file: { name: string }) => (
+                    <div className={styles.files} key={file.name} onClick={() => onSelectFile(file.name)}>
+                        {file.name}
+                    </div>
+                ))}
             </div>
         </div>
     );

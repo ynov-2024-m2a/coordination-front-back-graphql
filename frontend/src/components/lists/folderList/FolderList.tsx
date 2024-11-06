@@ -8,11 +8,14 @@ const GET_FOLDERS = gql`
         folders {
             name
         }
+        files {
+            name
+        }
       }
     }
 `;
 
-const FolderList = ({ onSelectFolder }: { onSelectFolder: (folder: string) => void }) => {
+const FolderList = ({ onSelectFolder, onSelectFile }: { onSelectFolder: (folder: string) => void, onSelectFile: (file: string) => void }) => {
     const { loading, error, data } = useQuery(GET_FOLDERS);
 
     if (loading) return <p>Loading...</p>;
@@ -25,6 +28,11 @@ const FolderList = ({ onSelectFolder }: { onSelectFolder: (folder: string) => vo
                 {data.root.folders.map((folder: {name: string}) => (
                     <div className={styles.folders} key={folder.name} onClick={() => onSelectFolder(folder.name)}>
                         {folder.name}
+                    </div>
+                ))}
+                {data.root.files.map((file: {name: string}) => (
+                    <div className={styles.files} key={file.name} onClick={() => onSelectFile(file.name)}>
+                        {file.name}
                     </div>
                 ))}
             </div>
