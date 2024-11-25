@@ -3,8 +3,10 @@
 import React, {useState} from 'react';
 import styles from "./fileList.module.scss";
 import { useQuery, useMutation, gql } from '@apollo/client';
-import {Button, Flex, Input, Modal, Upload, UploadProps} from "antd";
+import {Button, Flex, Input, message, Modal, Upload, UploadProps} from "antd";
 import {PlusOutlined, InboxOutlined} from "@ant-design/icons";
+
+const { Dragger } = Upload;
 
 const GET_FILES = gql`
   query {
@@ -20,7 +22,6 @@ const GET_FILES = gql`
     }
   }
 `;
-const { Dragger } = Upload;
 
 const CREATE_FILE = gql`
   mutation CreateFile($name: String!, $content: String!) {
@@ -40,7 +41,7 @@ const MOVE_FILE = gql`
 
 const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (file: string) => void }) => {
     const { loading, error, data, refetch } = useQuery(GET_FILES);
-    const [createFile, { data: mutationData, loading: mutationLoading, error: mutationError }] = useMutation(CREATE_FILE);
+    const [createFile, { loading: mutationLoading, error: mutationError }] = useMutation(CREATE_FILE);
     const [moveFile] = useMutation(MOVE_FILE);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [name, setName] = useState('');
@@ -56,16 +57,20 @@ const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (fil
 
     const handleCreateFile = async () => {
         try {
-            const response = await createFile({ variables: { name, content } });
-            const newFileId = response.data.createFile.id;
-            const currentFolder = data.root.folders.find((f: { name: string }) => f.name === folder);
-
-            if (currentFolder) {
-                await moveFile({ variables: { id: newFileId, folderId: currentFolder.id } });
-                await refetch();
+            if (!name || !content) {
                 setIsModalOpen(false);
             } else {
-                console.error('Current folder not found');
+                const response = await createFile({variables: {name, content}});
+                const newFileId = response.data.createFile.id;
+                const currentFolder = data.root.folders.find((f: { name: string }) => f.name === folder);
+
+                if (currentFolder) {
+                    await moveFile({variables: {id: newFileId, folderId: currentFolder.id}});
+                    await refetch();
+                    setIsModalOpen(false);
+                } else {
+                    console.error('Current folder not found');
+                }
             }
         } catch (error) {
             if (error instanceof Error) {
@@ -82,20 +87,19 @@ const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (fil
     const props: UploadProps = {
       name: 'file',
       multiple: true,
-      directory: false, // Pas de dossiers, juste des fichiers
+      directory: false,
       customRequest: async (options) => {
           const { file, onSuccess, onError } = options;
-  
+
           try {
               const fileReader = new FileReader();
               fileReader.onload = async (event) => {
                   const content = event.target?.result;
                   if (typeof content === "string") {
-                      // Créez le fichier via la mutation
-                      const response = await createFile({ variables: { name: file.name, content } });
+                      const response = await createFile({ variables: { name: (file as File).name, content } });
                       const newFileId = response.data.createFile.id;
                       const currentFolder = data.root.folders.find((f: { name: string }) => f.name === folder);
-  
+
                       if (currentFolder) {
                           await moveFile({ variables: { id: newFileId, folderId: currentFolder.id } });
                           await refetch();
@@ -106,9 +110,8 @@ const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (fil
                   }
               };
               fileReader.onerror = (error) => onError?.(error);
-              fileReader.readAsText(file as Blob); // Lis le fichier comme texte pour extraction du contenu
+              fileReader.readAsText(file as Blob);
           } catch (error) {
-              onError?.(error);
               if (error instanceof Error) {
                   console.error("Upload error:", error.message);
               }
@@ -134,31 +137,32 @@ const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (fil
 
     return (
         <div>
-            <p className={styles.title}>{folder}</p>
-            <Button type="primary" onClick={showModal}>
-                <PlusOutlined />
-            </Button>
-            <Modal title="Create file" open={isModalOpen} onOk={handleCreateFile} onCancel={handleCancel}>
-                <Flex vertical gap={"10px"}>
-                    <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-                    <Input placeholder="Description" value={content} onChange={(e) => setContent(e.target.value)} />
+            <Flex gap={"10px"} justify="space-between">
+                <p className={styles.title}>{folder}</p>
+                <Button type="primary" onClick={showModal}>
+                    <PlusOutlined />
+                </Button>
+                <Modal title="Create file" open={isModalOpen} onOk={handleCreateFile} onCancel={handleCancel}>
+                    <Flex vertical gap={"10px"}>
+                        <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+                        <Input placeholder="Description" value={content} onChange={(e) => setContent(e.target.value)} />
+                        <Dragger {...props}>
+                            <p>
+                                <InboxOutlined />
+                            </p>
+                            <p>Click or drag file to this area to upload</p>
+                            <p>
+                                Support for a single or bulk upload. Strictly prohibited from uploading company data or other
+                                banned files.
+                            </p>
+                        </Dragger>
 
-                    {mutationLoading && <p>Creating file...</p>}
-                    {mutationError && <p>Error: {mutationError.message}</p>}
-                    {mutationData && <p>File created: {mutationData.createFile.name}</p>}
-                </Flex>
-            </Modal>
+                        {mutationLoading && <p>Creating file...</p>}
+                        {mutationError && <p>Error: {mutationError.message}</p>}
+                    </Flex>
+                </Modal>
+            </Flex>
             <div className={styles.files_list}>
-                <Dragger {...props}>
-                    <p>
-                        <InboxOutlined />
-                    </p>
-                    <p>Click or drag file to this area to upload</p>
-                    <p>
-                        Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-                        banned files.
-                    </p>
-                </Dragger>
                 {selectedFolder.files.map((file: { name: string }) => (
                     <div className={styles.files} key={file.name} onClick={() => onSelectFile(file.name)}>
                         {file.name}
