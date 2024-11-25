@@ -1,100 +1,143 @@
 import React from "react";
 import { useState } from "react";
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import type { MenuProps, } from 'antd';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { FolderOutlined, FileOutlined } from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import { Breadcrumb, Layout, Menu, theme } from "antd";
 import FileList from "@/components/lists/fileList/FileList";
 import FileEditor from "@/components/fileEditor/FileEditor";
 import FolderList from "@/components/lists/folderList/FolderList";
+import { useQuery, gql } from "@apollo/client";
 
 const { Content, Sider } = Layout;
 
-
-const siderItems: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
-    (icon, index) => {
-        const key = String(index + 1);
-
-        return {
-            key: `sub${key}`,
-            icon: React.createElement(icon),
-            label: `subnav ${key}`,
-
-            children: new Array(4).fill(null).map((_, j) => {
-                const subKey = index * 4 + j + 1;
-                return {
-                    key: subKey,
-                    label: `option${subKey}`,
-                };
-            }),
-        };
-    },
-);
+const GET_FILES = gql`
+  query {
+    root {
+      folders {
+        name
+        files {
+          name
+        }
+      }
+    }
+  }
+`;
 
 const MainContent = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
 
-    const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
-    const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-    const handleBreadcrumbClick = (item: string) => {
-        if (item === 'Accueil') {
-            setSelectedFolder(null);
-            setSelectedFile(null);
-        } else if (item === selectedFolder) {
-            setSelectedFile(null);
-        }
-    };
+  const { loading, error, data } = useQuery(GET_FILES);
 
-    const generateBreadcrumbItems = () => {
-        const items = [{ title: 'Accueil', onClick: () => handleBreadcrumbClick('Accueil') }];
-        if (selectedFolder) {
-            items.push({ title: selectedFolder, onClick: () => handleBreadcrumbClick(selectedFolder) });
-        }
-        if (selectedFile) {
-            items.push({
-                onClick(): void {
-                }, title: selectedFile });
-        }
-        return items;
-    };
+  console.log(data )  
 
-    return (
-        <Layout style={{ height: '100vh' }}
-        >
-            <Layout>
-                <Sider width={200} style={{ background: colorBgContainer }}>
-                    <Menu
-                        mode="inline"
-                        defaultSelectedKeys={['1']}
-                        defaultOpenKeys={['sub1']}
-                        style={{ height: '100%', borderRight: 0 }}
-                        items={siderItems}
-                    />
-                </Sider>
-                <Layout style={{ padding: '0 24px 24px' }}>
-                    <Breadcrumb
-                        items={generateBreadcrumbItems()}
-                        style={{ margin: '16px 0', cursor: 'pointer' }}
-                    />
-                    <Content
-                        style={{
-                            padding: 24,
-                            margin: 0,
-                            minHeight: 280,
-                            background: colorBgContainer,
-                            borderRadius: borderRadiusLG,
-                        }}
-                    >
-                        {!selectedFolder && !selectedFile && <FolderList onSelectFolder={setSelectedFolder} onSelectFile={setSelectedFile} />}
-                        {selectedFolder && !selectedFile && <FileList folder={selectedFolder} onSelectFile={setSelectedFile} />}
-                        {selectedFile && <FileEditor file={selectedFile} />}
-                    </Content>
-                </Layout>
-            </Layout>
+  if (loading) return <p>Loading...</p>;
+  if (error) {
+    console.error("GraphQL Error:", error);
+    return <p>Error: {error.message}</p>;
+  }
+
+  const siderItems: MenuProps["items"] = data.root.folders.map(
+    (folder: any, index: number) => {
+      const key = String(index + 1);
+      return {
+        key: `sub${key}`,
+        icon: <FolderOutlined />,
+        label: folder.name,
+        children: folder.files.map((file: any, subIndex: number) => ({
+          key: `${key}-${subIndex + 1}`,
+          icon: <FileOutlined />,
+          label: file.name,
+        })),
+      };
+    }
+  );
+
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    const keys = e.key.split('-');
+    const folderIndex = parseInt(keys[0], 10) - 1;
+    const fileIndex = parseInt(keys[1], 10) - 1;
+
+    const selectedFolder = data.root.folders[folderIndex];
+    const selectedFile = selectedFolder.files[fileIndex];
+
+    setSelectedFolder(selectedFolder.name);
+    setSelectedFile(selectedFile.name);
+};
+
+  const handleBreadcrumbClick = (item: string) => {
+    if (item === "Accueil") {
+      setSelectedFolder(null);
+      setSelectedFile(null);
+    } else if (item === selectedFolder) {
+      setSelectedFile(null);
+    }
+  };
+
+  const generateBreadcrumbItems = () => {
+    const items = [
+      { title: "Accueil", onClick: () => handleBreadcrumbClick("Accueil") },
+    ];
+    if (selectedFolder) {
+      items.push({
+        title: selectedFolder,
+        onClick: () => handleBreadcrumbClick(selectedFolder),
+      });
+    }
+    if (selectedFile) {
+      items.push({
+        onClick(): void {},
+        title: selectedFile,
+      });
+    }
+    return items;
+  };
+
+  return (
+    <Layout style={{ height: "100vh" }}>
+      <Layout>
+        <Sider width={200} style={{ background: colorBgContainer }}>
+          <Menu
+            mode="inline"
+            defaultSelectedKeys={["1"]}
+            defaultOpenKeys={["sub1"]}
+            style={{ height: "100%", borderRight: 0 }}
+            items={siderItems}
+            onClick={handleMenuClick}
+          />
+        </Sider>
+        <Layout style={{ padding: "0 24px 24px" }}>
+          <Breadcrumb
+            items={generateBreadcrumbItems()}
+            style={{ margin: "16px 0", cursor: "pointer" }}
+          />
+          <Content
+            style={{
+              padding: 24,
+              margin: 0,
+              minHeight: 280,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}>
+            {!selectedFolder && (
+              <FolderList onSelectFolder={setSelectedFolder} onSelectFile={setSelectedFile} />
+            )}
+            {selectedFolder && !selectedFile && (
+              <FileList
+                folder={selectedFolder}
+                onSelectFile={setSelectedFile}
+              />
+            )}
+            {selectedFile && <FileEditor file={selectedFile} />}
+          </Content>
         </Layout>
-    );
+      </Layout>
+    </Layout>
+  );
 };
 
 export default MainContent;
