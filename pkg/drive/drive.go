@@ -136,6 +136,18 @@ func UpdateFileContent(id, content string) (*models.File, error) {
 			return f, nil
 		}
 	}
+	for _, folder := range root.Folders {
+		for _, f := range folder.Files {
+			if f.ID == id {
+				f.Content = content
+				select {
+				case fileChannels[id] <- f:
+				default:
+				}
+				return f, nil
+			}
+		}
+	}
 	return nil, fmt.Errorf("file with id " + id + " not found")
 }
 
