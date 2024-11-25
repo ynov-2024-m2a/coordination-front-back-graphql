@@ -5,12 +5,12 @@
 - Mehdi Seddik
 - Claire Ferrand
 - Abdoulaye Gueye
-- Bryan raparison
+- Bryan Raparison
 
 ## Technologies
 - go
 - graphql
-- React (Typescript)
+- Next.js (Typescript)
 - Ant design
 
 ## Lancement du projet 
