@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './fileEditor.module.scss';
 import { Editor as MonacoEditor } from '@monaco-editor/react';
 import { useQuery, useMutation, gql } from '@apollo/client';
-import { Button, Flex } from 'antd';
+import {Button, Flex, message} from 'antd';
 
 const GET_FILES = gql`
   query {
@@ -52,7 +52,7 @@ const FileEditor = ({ file }: { file: string }) => {
             .flatMap((folder: { files: { id: string, name: string, content: string }[] }) => folder.files)
             .find((f: { name: string }) => f.name === file);
         if (selectedFile) {
-            console.log('Updating file with ID:', selectedFile.id);
+            message.success(`file updated successfully.`);
             await updateFileContent({ variables: { id: selectedFile.id, content } });
         } else {
             console.error('File not found:', file);
@@ -91,14 +91,14 @@ const FileEditor = ({ file }: { file: string }) => {
 
     return (
         <div className={styles.container}>
-            <Flex gap="10px">
+            <Flex gap="10px" justify="space-between">
                 <p className={styles.title}>{file}</p>
                 <Button onClick={handleSave}>Save</Button>
             </Flex>
             <MonacoEditor
                 height="70vh"
                 language={language}
-                theme="light"
+                theme="vs-dark"
                 value={content}
                 onChange={handleEditorChange}
             />
