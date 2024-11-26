@@ -2,7 +2,7 @@
 
 import React, {useState} from 'react';
 import styles from "./fileList.module.scss";
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation, useSubscription, gql} from '@apollo/client';
 import {Button, Flex, Input, message, Modal, Upload, UploadProps} from "antd";
 import {PlusOutlined, InboxOutlined} from "@ant-design/icons";
 
@@ -33,6 +33,21 @@ const CREATE_FILE = gql`
   }
 `;
 
+const ROOT_UPDATED = gql`
+  subscription {
+    rootUpdated {
+      folders {
+        id
+        name
+        files {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
 const MOVE_FILE = gql`
   mutation MoveFile($id: ID!, $folderId: ID!) {
     MoveFile(id: $id, folderId: $folderId)
@@ -46,6 +61,16 @@ const FileList = ({ folder, onSelectFile }: { folder: string, onSelectFile: (fil
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [name, setName] = useState('');
     const [content, setContent] = useState('');
+
+     // Gestion de la subscription
+    useSubscription(ROOT_UPDATED, {
+        onSubscriptionData: ({ subscriptionData }) => {
+        if (subscriptionData?.data?.rootUpdated) {
+            console.log("Root updated:", subscriptionData.data.rootUpdated);
+            refetch(); // Met à jour les données locales
+        }
+        },
+    });
 
     const showModal = () => {
         setIsModalOpen(true);
